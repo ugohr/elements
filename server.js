@@ -22,7 +22,7 @@ io.on('connection', function(socket) {
     this.emit('newRoomCreated', {gameId: gameId, socketId: this.id})
     this.join(gameId.toString())
     players = [{username: data.username, socketId: this.id}]
-    this.adapter.rooms[gameId].players = players
+    this.adapter.rooms[gameId.toString()].players = players
   })
 
   socket.on('joinRoomByCode', function(data) {
