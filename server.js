@@ -10,8 +10,8 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html')
 })
 
-http.listen(8080, function() {
-  console.log('listening on *:8080')
+http.listen(process.env.PORT || 80, function() {
+  console.log('listening on *:80')
 })
 
 io.on('connection', function(socket) {
