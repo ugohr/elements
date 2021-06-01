@@ -35,9 +35,6 @@ io.on('connection', function(socket) {
         socketId: this.id,
         gameId: gameId
     })
-
-    console.log(rooms[0].players)
-    console.log(playerRooms)
   })
 
   socket.on('joinRoomByCode', function(data) {
@@ -60,9 +57,6 @@ io.on('connection', function(socket) {
       }
       io.in(data.gameId).emit('currentPlayers', room.players)
     }
-
-    console.log(rooms[0].players)
-    console.log(playerRooms)
   })
 
   socket.on('disconnecting', function() {
@@ -84,9 +78,6 @@ io.on('connection', function(socket) {
     rooms[index] = room
 
     socket.broadcast.to(gameId).emit('disconnection', room.players)
-
-    console.log(rooms[0].players)
-    console.log(playerRooms)
   })
 })
 
