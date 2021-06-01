@@ -36,7 +36,7 @@ io.on('connection', function(socket) {
         gameId: gameId
     })
 
-    console.log(rooms[0].players)
+    console.log(rooms)
     console.log(playerRooms)
   })
 
@@ -61,7 +61,7 @@ io.on('connection', function(socket) {
       io.in(data.gameId).emit('currentPlayers', room.players)
     }
 
-    console.log(rooms[0].players)
+    console.log(rooms)
     console.log(playerRooms)
   })
 
@@ -85,7 +85,7 @@ io.on('connection', function(socket) {
 
     socket.broadcast.to(gameId).emit('disconnection', room.players)
 
-    console.log(rooms[0].players)
+    console.log(rooms)
     console.log(playerRooms)
   })
 })
