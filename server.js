@@ -1,7 +1,10 @@
-var express = require('express')
-var app = express()
-var http = require('http').createServer(app)
-var io = require('socket.io')(http)
+const express = require('express')
+const app = express()
+const http = require('http')
+const server = http.createServer(app)
+const { Server } = require("socket.io")
+const io = new Server(server)
+const PORT = process.env.PORT || 80
 
 app.use('/css',express.static(__dirname + '/css'))
 app.use('/js',express.static(__dirname + '/js'))
@@ -10,51 +13,80 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html')
 })
 
-http.listen(process.env.PORT || 80, function() {
-  console.log('listening on *:80')
+server.listen(PORT, function() {
+  console.log('listening on *:'+PORT)
 })
 
+var rooms = []
+var playerRooms = []
+
 io.on('connection', function(socket) {
+
+  console.log('A user connected')
 
   // Create a new private game and generate random access code
   socket.on('hostCreateNewRoom', function(data) {
     let gameId = generateRoomId(6)
-    console.log(gameId)
     this.emit('newRoomCreated', {gameId: gameId, socketId: this.id})
-    this.join(gameId)
-    players = [{username: data.username, socketId: this.id}]
-    console.log(players)
-    console.log(this.adapter.rooms)
-    this.adapter.rooms[gameId].players = players
+    socket.join(gameId)
+    let players = [{username: data.username, socketId: this.id}]
+    rooms.push({gameId: gameId, players: players})
+    playerRooms.push({
+        socketId: this.id,
+        gameId: gameId
+    })
+
+    console.log(rooms[0].players)
+    console.log(playerRooms)
   })
 
   socket.on('joinRoomByCode', function(data) {
-    let room = this.adapter.rooms[data.gameId]
-    if (room && room.length > 0 && room.length < 11) {
-      this.join(data.gameId.toString())
+    var room = rooms.find((e) => e.gameId === data.gameId)
+    var index = rooms.indexOf(room)
+    if (room) {
       let hasAlreadyJoined = false
-      this.adapter.rooms[data.gameId].players.forEach((player, i) => {
+      room.players.forEach((player, i) => {
         if (player.socketId === this.id)
           hasAlreadyJoined = true
       })
-      if (!hasAlreadyJoined)
-        this.adapter.rooms[data.gameId].players.push({username: data.username, socketId: this.id})
-      io.in(data.gameId).emit('currentPlayers', this.adapter.rooms[data.gameId].players)
+      if (!hasAlreadyJoined) {
+        this.join(data.gameId)
+        room.players.push({username: data.username, socketId: this.id})
+        rooms[index] = room
+        playerRooms.push({
+            socketId: this.id,
+            gameId: data.gameId
+        })
+      }
+      io.in(data.gameId).emit('currentPlayers', room.players)
     }
+
+    console.log(rooms[0].players)
+    console.log(playerRooms)
   })
 
   socket.on('disconnecting', function() {
-    var rooms = socket.rooms
-    Object.entries(rooms).forEach((room, i) => {
-      if (room[0] !== socket.id) {
-        let players = this.adapter.rooms[room[0]].players
-        players.forEach((player, i) => {
-          if (player.socketId === socket.id)
-            players.splice(i, 1)
-        })
-        socket.broadcast.to(room[0]).emit('disconnection', this.adapter.rooms[room[0]].players)
-      }
-    })
+
+    console.log('A user disconnected')
+
+    // Get gameId by socketId, then remove player from playerRooms
+    var playerRoom = playerRooms.find((e) => e.socketId === this.id)
+    var gameId = playerRoom.gameId
+    var playerRoomIndex = playerRooms.indexOf(playerRoom)
+    playerRooms.splice(playerRoomIndex, 1)
+
+    // Get room by gameId, then remove player from room
+    var room = rooms.find((e) => e.gameId === gameId)
+    var index = rooms.indexOf(room)
+    var player = room.players.find((e) => e.socketId === this.id)
+    var playerIndex = room.players.indexOf(player)
+    room.players.splice(playerIndex, 1)
+    rooms[index] = room
+
+    socket.broadcast.to(gameId).emit('disconnection', room.players)
+
+    console.log(rooms[0].players)
+    console.log(playerRooms)
   })
 })
 
