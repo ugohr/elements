@@ -26,7 +26,7 @@ io.on('connection', function(socket) {
 
     // Create a new private game and generate random access code
     socket.on('hostCreateNewRoom', function(data) {
-        let gameId = generateRoomId(6)
+        let gameId = generateRoomId(5)
         this.emit('newRoomCreated', {gameId: gameId, socketId: this.id})
         socket.join(gameId)
         let players = [{username: data.username, socketId: this.id}]
@@ -99,7 +99,7 @@ io.on('connection', function(socket) {
 
 generateRoomId = (length) => {
     let result = ''
-    let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     let charactersLength = characters.length
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength))

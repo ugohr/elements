@@ -9,19 +9,19 @@
 
         <!-- Homepage where you can create or join a private room -->
         <div id="home">
-            <h1>Home</h1><br />
-            <label for="username">Enter a username</label>
-            <input type="text" id="username" name="username" value="example" /><br /><br /><br />
-            <button id="newBtn" onclick="client.createNewRoom()">Create private room</button><br />
-            <span>------- OR -------</span><br />
+            <h1>Accueil</h1><br />
+            <label for="username">Pseudo</label>
+            <input type="text" id="username" name="username" value="Guest" /><br /><br /><br /><br />
+            <button id="newBtn" onclick="client.createNewRoom()">Créer une partie privée</button><br />
+            <span>------- OU -------</span><br />
             <input type="text" id="privateCode" />
-            <button onclick="client.joinRoomByCode()">Join room by code</button>
+            <button onclick="client.joinRoomByCode()">Rejoindre une partie par code</button>
         </div>
 
         <!-- Waiting room/lobby where you can see room code and who joined -->
         <div id="room" style="display: none;">
-            <h1>Room <span id="roomCode"></span></h1><br />
-            <h3>Players list</h3>
+            <h1>Lobby <span id="roomCode"></span></h1><br />
+            <h3>Liste des joueurs</h3>
             <div id="players"></div>
         </div>
 
