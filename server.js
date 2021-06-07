@@ -26,10 +26,10 @@ io.on('connection', function(socket) {
 
     // Create a new private game and generate random access code
     socket.on('hostCreateNewRoom', function(data) {
-        let gameId = generateRoomId(5)
+        let gameId = generateRoomId(6)
         this.emit('newRoomCreated', {gameId: gameId, socketId: this.id})
         socket.join(gameId)
-        let players = [{username: data.username, socketId: this.id}]
+        let players = [{username: data.username, socketId: this.id, isOwner: true}]
         rooms.push({gameId: gameId, players: players})
         playerRooms.push({
             socketId: this.id,
@@ -51,14 +51,14 @@ io.on('connection', function(socket) {
             })
             if (!hasAlreadyJoined) {
                 this.join(data.gameId)
-                room.players.push({username: data.username, socketId: this.id})
+                room.players.push({username: data.username, socketId: this.id, isOwner: false})
                 rooms[index] = room
                 playerRooms.push({
                     socketId: this.id,
                     gameId: data.gameId
                 })
             }
-            io.in(data.gameId).emit('currentPlayers', room.players)
+            io.in(data.gameId).emit('newPlayerJoined', room.players)
         }
 
         console.log(rooms)
@@ -85,8 +85,11 @@ io.on('connection', function(socket) {
                 room.players.splice(playerIndex, 1)
                 if (!room.players.length)
                     rooms.splice(index, 1)
-                else
+                else {
+                    if (player.isOwner)
+                        room.players[0].isOwner = true
                     rooms[index] = room
+                }
 
                 socket.broadcast.to(gameId).emit('disconnection', room.players)
             }
@@ -95,11 +98,19 @@ io.on('connection', function(socket) {
         console.log(rooms)
         console.log(playerRooms)
     })
+
+    socket.on('hostStartGame', function(data) {
+
+        console.log('Game started')
+
+        io.in(data.gameId).emit('gameStarted')
+
+    })
 })
 
 generateRoomId = (length) => {
     let result = ''
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     let charactersLength = characters.length
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength))

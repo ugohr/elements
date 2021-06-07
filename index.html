@@ -22,13 +22,22 @@
         <div id="room" style="display: none;">
             <h1>Lobby <span id="roomCode"></span></h1><br />
             <h3>Liste des joueurs</h3>
-            <div id="players"></div>
+            <div id="room-players"></div>
+            <button id="startButton" style="display: none;" onclick="room.startGame()">Démarrer la partie</button>
         </div>
 
         <!-- Game content goes here -->
-        <div id="game" style="display: none;"></div>
+        <div id="game" style="display: none;">
+            <h1>Partie</h1>
+            <div id="game-players"></div>
+        </div>
 
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="js/client.js"></script>
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="js/client.js"></script>
+        <script type="text/javascript" src="js/room.js"></script>
+        <script type="text/javascript">
+            var client = new Client()
+            var room = null
+        </script>
     </body>
 </html>
